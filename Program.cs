@@ -20,16 +20,12 @@ namespace CitySimPrototype
         }
     }
 
-    // ÂX¥Rª©¼ÒÀÀ«°¥««Ø³]­ì«¬ (WinForms ³æÀÉ¥Ü½d)
-    // ¥\¯à·s¼W¡G«Ø¿v¤É¯Å¡BÀH¾÷¨Æ¥ó/¦ÛµM¨a®`¡BÀx¦s/Åª¨ú¡BÂ²©ö¤é»x¡B¥kÁä¤¬°Ê
-    // ¨Ï¥Î¤èªk¡GVisual Studio -> «Ø¥ß WinForms (.NET Framework) -> ´À´« Program.cs ¤º®e¬°¥»ÀÉ¨Ã°õ¦æ
-
     public enum TileType { Empty, Residential, Commercial, Industrial, PowerPlant, WaterPlant, Road, Park }
 
     public class Tile
     {
         public TileType Type { get; set; } = TileType.Empty;
-        public int Level { get; set; } = 1; // ¤É¯Åµ¥¯Å
+        public int Level { get; set; } = 1; // å‡ç´šç­‰ç´š
     }
 
     [Serializable]
@@ -39,7 +35,7 @@ namespace CitySimPrototype
         public int Height { get; set; }
         public Tile[,] Map { get; set; }
 
-        // ¸ê·½
+        // è³‡æº
         public int Money { get; set; }
         public int Power { get; set; }
         public int Water { get; set; }
@@ -48,10 +44,10 @@ namespace CitySimPrototype
         public int Jobs { get; set; }
         public int Pollution { get; set; }
 
-        // ¨ä¥L
+        // å…¶ä»–
         public int TickCount { get; set; }
 
-        // ¥²­nªºµL°Ñºc³y
+        // å¿…è¦çš„ç„¡åƒæ§‹é€ 
         public CityState() { }
 
         public CityState(int w, int h)
@@ -62,7 +58,7 @@ namespace CitySimPrototype
                 for (int y = 0; y < h; y++)
                     Map[x, y] = new Tile();
 
-            // ªì©l¸ê·½
+            // åˆå§‹è³‡æº
             Money = 8000;
             Power = 0;
             Water = 0;
@@ -78,7 +74,7 @@ namespace CitySimPrototype
         public void Tick(int secondsElapsed, double taxRate, Action<string> log)
         {
             TickCount++;
-            // ­pºâ²£¥X/®ø¯Ó
+            // è¨ˆç®—ç”¢å‡º/æ¶ˆè€—
             int powerProduced = 0;
             int waterProduced = 0;
             int materialsProduced = 0;
@@ -122,11 +118,11 @@ namespace CitySimPrototype
             int powerNeeded = Population * 1;
             int waterNeeded = Population * 1;
 
-            // ¨Ñ»İ
+            // ä¾›éœ€
             int powerSurplus = powerProduced - powerNeeded;
             int waterSurplus = waterProduced - waterNeeded;
 
-            // ¬ö¿ı¨Ñµ¹¨ìª¬ºA
+            // ç´€éŒ„ä¾›çµ¦åˆ°ç‹€æ…‹
             Power = Math.Max(0, powerProduced);
             Water = Math.Max(0, waterProduced);
 
@@ -134,8 +130,8 @@ namespace CitySimPrototype
             if (powerProduced < powerNeeded) shortageFactor += (powerNeeded - powerProduced) / (double)Math.Max(1, powerNeeded);
             if (waterProduced < waterNeeded) shortageFactor += (waterNeeded - waterProduced) / (double)Math.Max(1, waterNeeded);
 
-            // ¤H¤fÅÜ¤Æ¡]¥[¤J§óÃ­°·ªº±ø¥ó¡^
-            int growthBase = (int)(Population *  (1.0 - shortageFactor)); // °òÂ¦¼Wªø
+            // äººå£è®ŠåŒ–ï¼ˆåŠ å…¥æ›´ç©©å¥çš„æ¢ä»¶ï¼‰
+            int growthBase = (int)(Population *  (1.0 - shortageFactor)); // åŸºç¤å¢é•·
 
             int vacancy = residentialCapacity - Population;
             if (vacancy < 0) growthBase -= (int)(Math.Abs(vacancy) * 0.5);
@@ -143,18 +139,18 @@ namespace CitySimPrototype
             int jobGap = Math.Max(0, Population - Jobs);
             if (jobGap > 0) growthBase -= (int)(jobGap * 0.03);
 
-            // ¦Ã¬V»Pº¡·N«×¼vÅT
-            double pollutionPenalty = Math.Max(0, (Pollution + pollutionGenerated) / 1000.0); // ¦Ã¬V¹L°ª·|°I°h
+            // æ±¡æŸ“èˆ‡æ»¿æ„åº¦å½±éŸ¿
+            double pollutionPenalty = Math.Max(0, (Pollution + pollutionGenerated) / 1000.0); // æ±¡æŸ“éé«˜æœƒè¡°é€€
             growthBase = (int)(growthBase * (1.2 - pollutionPenalty-taxRate));
 
-            // ²b¤H¤fÅÜ¤Æ
+            // æ·¨äººå£è®ŠåŒ–
             Population = Math.Max(0, Population + growthBase);
 
             Jobs = Math.Min(Population,commercialJobs + industrialJobs);
-            // ²£ª«¶i±b
+            // ç”¢ç‰©é€²å¸³
             Materials += materialsProduced;
 
-            // µ|¦¬»PºûÅ@
+            // ç¨…æ”¶èˆ‡ç¶­è­·
             int taxes = (int)(Population * taxRate + commercialJobs * 1);
             Money += taxes;
             int maintenance = (int)(Width * Height * 0.12 + Population * 0.6);
@@ -162,10 +158,10 @@ namespace CitySimPrototype
 
             Pollution = Math.Max(0, Pollution + pollutionGenerated-10);
 
-            // ¬ö¿ı¤é»x¡]¨C 10 tick ¿é¥X¤@¦¸ºK­n¡^
+            // ç´€éŒ„æ—¥èªŒï¼ˆæ¯ 10 tick è¼¸å‡ºä¸€æ¬¡æ‘˜è¦ï¼‰
             if (TickCount % 10 == 0)
             {
-                log?.Invoke($"Tick {TickCount}: ¤H¤f={Population}, ª÷¿ú={Money}, ´N·~={Jobs}, ¦Ã¬V={Pollution}");
+                log?.Invoke($"Tick {TickCount}: äººå£={Population}, é‡‘éŒ¢={Money}, å°±æ¥­={Jobs}, æ±¡æŸ“={Pollution}");
             }
         }
     }
@@ -185,7 +181,7 @@ namespace CitySimPrototype
         ListBox lstLog;
 
         Random rng = new Random();
-        double eventChancePerTick = 0.05; // ¨C¬í 5% ¾÷²v¥X¨Æ¥ó
+        double eventChancePerTick = 0.05; // æ¯ç§’ 5% æ©Ÿç‡å‡ºäº‹ä»¶
 
         public MainForm()
         {
@@ -199,7 +195,7 @@ namespace CitySimPrototype
             InitializeUI();
 
             simTimer = new Timer();
-            simTimer.Interval = 1000; // ¨C¬í tick
+            simTimer.Interval = 1000; // æ¯ç§’ tick
             simTimer.Tick += SimTimer_Tick;
             simTimer.Start();
         }
@@ -224,62 +220,62 @@ namespace CitySimPrototype
             int bx = mapPanel.Right + 20;
             int by = 10;
 
-            Label l = new Label() { Text = "«Ø¿v¿ï³æ¡G", Location = new Point(bx, by), AutoSize = true };
+            Label l = new Label() { Text = "å»ºç¯‰é¸å–®ï¼š", Location = new Point(bx, by), AutoSize = true };
             this.Controls.Add(l);
             by += 24;
 
-            btnResidential = new Button() { Text = "¦í¦v", Location = new Point(bx, by), Width = 120 };
+            btnResidential = new Button() { Text = "ä½å®…", Location = new Point(bx, by), Width = 120 };
             btnResidential.Click += (s, e) => selected = TileType.Residential; this.Controls.Add(btnResidential); by += 32;
-            btnCommercial = new Button() { Text = "°Ó·~", Location = new Point(bx, by), Width = 120 };
+            btnCommercial = new Button() { Text = "å•†æ¥­", Location = new Point(bx, by), Width = 120 };
             btnCommercial.Click += (s, e) => selected = TileType.Commercial; this.Controls.Add(btnCommercial); by += 32;
-            btnIndustrial = new Button() { Text = "¤u·~", Location = new Point(bx, by), Width = 120 };
+            btnIndustrial = new Button() { Text = "å·¥æ¥­", Location = new Point(bx, by), Width = 120 };
             btnIndustrial.Click += (s, e) => selected = TileType.Industrial; this.Controls.Add(btnIndustrial); by += 32;
-            btnPower = new Button() { Text = "µo¹q¼t", Location = new Point(bx, by), Width = 120 };
+            btnPower = new Button() { Text = "ç™¼é›»å» ", Location = new Point(bx, by), Width = 120 };
             btnPower.Click += (s, e) => selected = TileType.PowerPlant; this.Controls.Add(btnPower); by += 32;
-            btnWater = new Button() { Text = "²b¤ô¼t", Location = new Point(bx, by), Width = 120 };
+            btnWater = new Button() { Text = "æ·¨æ°´å» ", Location = new Point(bx, by), Width = 120 };
             btnWater.Click += (s, e) => selected = TileType.WaterPlant; this.Controls.Add(btnWater); by += 32;
-            btnRoad = new Button() { Text = "¹D¸ô", Location = new Point(bx, by), Width = 120 };
+            btnRoad = new Button() { Text = "é“è·¯", Location = new Point(bx, by), Width = 120 };
             btnRoad.Click += (s, e) => selected = TileType.Road; this.Controls.Add(btnRoad); by += 32;
-            btnPark = new Button() { Text = "¤½¶é", Location = new Point(bx, by), Width = 120 };
+            btnPark = new Button() { Text = "å…¬åœ’", Location = new Point(bx, by), Width = 120 };
             btnPark.Click += (s, e) => selected = TileType.Park; this.Controls.Add(btnPark); by += 32;
 
             by += 8;
-            Label resLabel = new Label() { Text = "¸ê·½­±ªO¡G", Location = new Point(bx, by), AutoSize = true };
+            Label resLabel = new Label() { Text = "è³‡æºé¢æ¿ï¼š", Location = new Point(bx, by), AutoSize = true };
             this.Controls.Add(resLabel); by += 24;
 
-            lblMoney = AddStatusLabel("ª÷¿ú:", bx, ref by);
-            lblPower = AddStatusLabel("¹q¤O:", bx, ref by);
-            lblWater = AddStatusLabel("¤ô:", bx, ref by);
-            lblMaterials = AddStatusLabel("«Ø§÷:", bx, ref by);
-            lblPopulation = AddStatusLabel("¤H¤f:", bx, ref by);
-            lblJobs = AddStatusLabel("´N·~:", bx, ref by);
-            lblPollution = AddStatusLabel("¦Ã¬V:", bx, ref by);
+            lblMoney = AddStatusLabel("é‡‘éŒ¢:", bx, ref by);
+            lblPower = AddStatusLabel("é›»åŠ›:", bx, ref by);
+            lblWater = AddStatusLabel("æ°´:", bx, ref by);
+            lblMaterials = AddStatusLabel("å»ºæ:", bx, ref by);
+            lblPopulation = AddStatusLabel("äººå£:", bx, ref by);
+            lblJobs = AddStatusLabel("å°±æ¥­:", bx, ref by);
+            lblPollution = AddStatusLabel("æ±¡æŸ“:", bx, ref by);
             lblTick = AddStatusLabel("Tick:", bx, ref by);
 
             by += 8;
-            Label taxLabel = new Label() { Text = "µ|²v¡G", Location = new Point(bx, by), AutoSize = true };
+            Label taxLabel = new Label() { Text = "ç¨…ç‡ï¼š", Location = new Point(bx, by), AutoSize = true };
             this.Controls.Add(taxLabel);
             nudTaxRate = new NumericUpDown() { Location = new Point(bx + 50, by - 3), Width = 60, DecimalPlaces = 2, Increment = 0.01M, Minimum = 0.0M, Maximum = 1.0M, Value = 0.10M };
             this.Controls.Add(nudTaxRate);
             by += 32;
 
-            Button btnPause = new Button() { Text = "¼È°±/Ä~Äò", Location = new Point(bx, by), Width = 120 };
+            Button btnPause = new Button() { Text = "æš«åœ/ç¹¼çºŒ", Location = new Point(bx, by), Width = 120 };
             btnPause.Click += (s, e) => simTimer.Enabled = !simTimer.Enabled; this.Controls.Add(btnPause); by += 32;
 
-            Button btnClear = new Button() { Text = "²MªÅ¦a¹Ï", Location = new Point(bx, by), Width = 120 };
-            btnClear.Click += (s, e) => { city = new CityState(GRID_W, GRID_H); Log("¦a¹Ï¤w²MªÅ"); InvalidateAll(); }; this.Controls.Add(btnClear); by += 32;
+            Button btnClear = new Button() { Text = "æ¸…ç©ºåœ°åœ–", Location = new Point(bx, by), Width = 120 };
+            btnClear.Click += (s, e) => { city = new CityState(GRID_W, GRID_H); Log("åœ°åœ–å·²æ¸…ç©º"); InvalidateAll(); }; this.Controls.Add(btnClear); by += 32;
 
-            Button btnSave = new Button() { Text = "Àx¦s¹CÀ¸", Location = new Point(bx, by), Width = 120 };
+            Button btnSave = new Button() { Text = "å„²å­˜éŠæˆ²", Location = new Point(bx, by), Width = 120 };
             btnSave.Click += (s, e) => SaveGame(); this.Controls.Add(btnSave); by += 32;
 
-            Button btnLoad = new Button() { Text = "Åª¨ú¹CÀ¸", Location = new Point(bx, by), Width = 120 };
+            Button btnLoad = new Button() { Text = "è®€å–éŠæˆ²", Location = new Point(bx, by), Width = 120 };
             btnLoad.Click += (s, e) => LoadGame(); this.Controls.Add(btnLoad); by += 32;
 
-            Button btnUpgrade = new Button() { Text = "¤É¯Å (¥kÁä¥ç¥i)", Location = new Point(bx, by), Width = 120 };
-            btnUpgrade.Click += (s, e) => { MessageBox.Show("½Ğ¥kÁä¦a¹Ï¤Wªº«Ø¿v¶i¦æ¤É¯Å¡C", "»¡©ú", MessageBoxButtons.OK, MessageBoxIcon.Information); };
+            Button btnUpgrade = new Button() { Text = "å‡ç´š (å³éµäº¦å¯)", Location = new Point(bx, by), Width = 120 };
+            btnUpgrade.Click += (s, e) => { MessageBox.Show("è«‹å³éµåœ°åœ–ä¸Šçš„å»ºç¯‰é€²è¡Œå‡ç´šã€‚", "èªªæ˜", MessageBoxButtons.OK, MessageBoxIcon.Information); };
             this.Controls.Add(btnUpgrade); by += 40;
 
-            Label logLabel = new Label() { Text = "¤é»x¡G", Location = new Point(bx, by), AutoSize = true };
+            Label logLabel = new Label() { Text = "æ—¥èªŒï¼š", Location = new Point(bx, by), AutoSize = true };
             this.Controls.Add(logLabel); by += 20;
 
             lstLog = new ListBox() { Location = new Point(bx, by), Size = new Size(360, 280) };
@@ -307,18 +303,18 @@ namespace CitySimPrototype
                 var tile = city.Map[gx, gy];
                 if (tile.Type == TileType.Empty)
                 {
-                    MessageBox.Show("ªÅ¦aµLªk¤É¯Å¡C", "¿ù»~", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("ç©ºåœ°ç„¡æ³•å‡ç´šã€‚", "éŒ¯èª¤", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
                 int upCost = GetUpgradeCost(tile);
                 int upMat = GetUpgradeMaterialsCost(tile);
-                var dr = MessageBox.Show($"¤É¯Å {tile.Type} µ¥¯Å {tile.Level} -> {tile.Level + 1}ª÷¿ú { upCost}, «Ø§÷ { upMat}¡C½T©w¡H", "¤É¯Å«Ø¿v", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                var dr = MessageBox.Show($"å‡ç´š {tile.Type} ç­‰ç´š {tile.Level} -> {tile.Level + 1}é‡‘éŒ¢ { upCost}, å»ºæ { upMat}ã€‚ç¢ºå®šï¼Ÿ", "å‡ç´šå»ºç¯‰", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (dr == DialogResult.Yes)
                 {
-                    if (city.Money < upCost) { MessageBox.Show("ª÷¿ú¤£¨¬¡C", "¿ù»~", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
-                    if (city.Materials < upMat) { MessageBox.Show("«Ø§÷¤£¨¬¡C", "¿ù»~", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                    if (city.Money < upCost) { MessageBox.Show("é‡‘éŒ¢ä¸è¶³ã€‚", "éŒ¯èª¤", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
+                    if (city.Materials < upMat) { MessageBox.Show("å»ºæä¸è¶³ã€‚", "éŒ¯èª¤", MessageBoxButtons.OK, MessageBoxIcon.Warning); return; }
                     city.Money -= upCost; city.Materials -= upMat; tile.Level++;
-                    Log($"¤w¤É¯Å®æ¤l ({gx},{gy}) ¬° {tile.Type} Lv{tile.Level}");
+                    Log($"å·²å‡ç´šæ ¼å­ ({gx},{gy}) ç‚º {tile.Type} Lv{tile.Level}");
                     InvalidateAll();
                 }
             }
@@ -336,12 +332,12 @@ namespace CitySimPrototype
                 int matCost = GetMaterialsCostFor(selected);
                 if (city.Money < cost)
                 {
-                    MessageBox.Show("ª÷¿ú¤£¨¬¡AµLªk«Ø³y¡C", "¿ù»~", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("é‡‘éŒ¢ä¸è¶³ï¼Œç„¡æ³•å»ºé€ ã€‚", "éŒ¯èª¤", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
                 if (city.Materials < matCost)
                 {
-                    MessageBox.Show("«Ø§÷¤£¨¬¡AµLªk«Ø³y¡C", "¿ù»~", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("å»ºæä¸è¶³ï¼Œç„¡æ³•å»ºé€ ã€‚", "éŒ¯èª¤", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -349,7 +345,7 @@ namespace CitySimPrototype
                 city.Materials -= matCost;
                 city.Map[gx, gy].Type = selected;
                 city.Map[gx, gy].Level = 1;
-                Log($"¦b ({gx},{gy}) «Ø³y {selected} ªá¶O {cost} ª÷¿ú, {matCost} «Ø§÷");
+                Log($"åœ¨ ({gx},{gy}) å»ºé€  {selected} èŠ±è²» {cost} é‡‘éŒ¢, {matCost} å»ºæ");
                 InvalidateAll();
             }
         }
@@ -386,7 +382,7 @@ namespace CitySimPrototype
 
         private int GetUpgradeCost(Tile tile)
         {
-            // ¤É¯Å¦¨¥»¥Hµ¥¯Å»PÃş«¬½Õ¾ã
+            // å‡ç´šæˆæœ¬ä»¥ç­‰ç´šèˆ‡é¡å‹èª¿æ•´
             int baseCost = 0;
             switch (tile.Type)
             {
@@ -410,7 +406,7 @@ namespace CitySimPrototype
         {
             double taxRate = (double)nudTaxRate.Value;
             city.Tick(1, taxRate, Log);
-            // ¨Æ¥óÄ²µo
+            // äº‹ä»¶è§¸ç™¼
             if (rng.NextDouble() < eventChancePerTick)
             {
                 TriggerRandomEvent();
@@ -421,11 +417,11 @@ namespace CitySimPrototype
 
         private void TriggerRandomEvent()
         {
-            // ¨Æ¥ó¡G¦a¾_¡]·´«Ø¦h®æ¡^¡B¸gÀÙÁcºa©Î°I°h
+            // äº‹ä»¶ï¼šåœ°éœ‡ï¼ˆæ¯€å»ºå¤šæ ¼ï¼‰ã€ç¶“æ¿Ÿç¹æ¦®æˆ–è¡°é€€
             double r = rng.NextDouble();
             if (r < 0.5)
             {
-                // ¦a¾_
+                // åœ°éœ‡
                 int cx = rng.Next(GRID_W);
                 int cy = rng.Next(GRID_H);
                 int radius = rng.Next(1, 3);
@@ -440,28 +436,28 @@ namespace CitySimPrototype
                             destroyed++;
                         }
                     }
-                city.Pollution = Math.Max(0, city.Pollution - destroyed); // °²³]«Ø¿v³Q·´¦Ã¬V¤Ï¦Ó¤U­°
-                MessageBox.Show($"¦a¾_¡I¤¤¤ß ({cx},{cy}) ¥b®| {radius}¡A·´Ãa {destroyed} ´É«Ø¿v¡C");
-                Log($"¦a¾_¡I¤¤¤ß ({cx},{cy}) ¥b®| {radius}¡A·´Ãa {destroyed} ´É«Ø¿v¡C");
-                city.Money -= 500 * destroyed; // ­««Ø¶O¥Î
+                city.Pollution = Math.Max(0, city.Pollution - destroyed); // å‡è¨­å»ºç¯‰è¢«æ¯€æ±¡æŸ“åè€Œä¸‹é™
+                MessageBox.Show($"åœ°éœ‡ï¼ä¸­å¿ƒ ({cx},{cy}) åŠå¾‘ {radius}ï¼Œæ¯€å£ {destroyed} æ£Ÿå»ºç¯‰ã€‚");
+                Log($"åœ°éœ‡ï¼ä¸­å¿ƒ ({cx},{cy}) åŠå¾‘ {radius}ï¼Œæ¯€å£ {destroyed} æ£Ÿå»ºç¯‰ã€‚");
+                city.Money -= 500 * destroyed; // é‡å»ºè²»ç”¨
             }
             else
             {
-                // ¸gÀÙ¨Æ¥ó
+                // ç¶“æ¿Ÿäº‹ä»¶
                 bool boom = rng.NextDouble() < 0.5;
                 if (boom)
                 {
                     int gain = 2000 + rng.Next(0, 2000);
                     city.Money += gain;
-                    MessageBox.Show($"¸gÀÙÁcºa¡GÀò±oÃB¥~¦¬¤J {gain}¡C");
-                    Log($"¸gÀÙÁcºa¡GÀò±oÃB¥~¦¬¤J {gain}¡C");
+                    MessageBox.Show($"ç¶“æ¿Ÿç¹æ¦®ï¼šç²å¾—é¡å¤–æ”¶å…¥ {gain}ã€‚");
+                    Log($"ç¶“æ¿Ÿç¹æ¦®ï¼šç²å¾—é¡å¤–æ”¶å…¥ {gain}ã€‚");
                 }
                 else
                 {
                     int loss = 1000 + rng.Next(0, 1500);
                     city.Money = Math.Max(0, city.Money - loss);
-                    MessageBox.Show($"¸gÀÙ°I°h¡G·l¥¢ {loss} ª÷¿ú¡C");
-                    Log($"¸gÀÙ°I°h¡G·l¥¢ {loss} ª÷¿ú¡C");
+                    MessageBox.Show($"ç¶“æ¿Ÿè¡°é€€ï¼šæå¤± {loss} é‡‘éŒ¢ã€‚");
+                    Log($"ç¶“æ¿Ÿè¡°é€€ï¼šæå¤± {loss} é‡‘éŒ¢ã€‚");
                 }
             }
             InvalidateAll();
@@ -513,8 +509,8 @@ namespace CitySimPrototype
                     }
                 }
 
-            // ¿ï¨ú´£¥Ü»P»¡©ú¤å¦r
-            g.DrawString($"¿ï¾Ü: " + selected.ToString() + " (¥ªÁä«Ø³y / ¥kÁä¤É¯Å)", this.Font, Brushes.Black, new PointF(mapPanel.Right + 22, 25));
+            // é¸å–æç¤ºèˆ‡èªªæ˜æ–‡å­—
+            g.DrawString($"é¸æ“‡: " + selected.ToString() + " (å·¦éµå»ºé€  / å³éµå‡ç´š)", this.Font, Brushes.Black, new PointF(mapPanel.Right + 22, 25));
         }
 
         private void SaveGame()
@@ -537,11 +533,11 @@ namespace CitySimPrototype
                     ser.Serialize(fs, data);
                 }
 
-                Log("Àx¦s¦¨¥\¡C" + Path.GetFileName(sfd.FileName));
+                Log("å„²å­˜æˆåŠŸã€‚" + Path.GetFileName(sfd.FileName));
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Àx¦s¥¢±Ñ: " + ex.Message);
+                MessageBox.Show("å„²å­˜å¤±æ•—: " + ex.Message);
             }
         }
 
@@ -565,12 +561,12 @@ namespace CitySimPrototype
                     city = data.ToCityState();
                 }
 
-                Log("ÅªÀÉ¦¨¥\¡C" + Path.GetFileName(ofd.FileName));
+                Log("è®€æª”æˆåŠŸã€‚" + Path.GetFileName(ofd.FileName));
                 InvalidateAll();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Åª¨ú¥¢±Ñ: " + ex.Message);
+                MessageBox.Show("è®€å–å¤±æ•—: " + ex.Message);
             }
         }
 
@@ -578,12 +574,12 @@ namespace CitySimPrototype
         {
             string time = DateTime.Now.ToString("HH:mm:ss");
             lstLog.Items.Insert(0, $"[{time}] {text}");
-            // ­­¨î¤é»xªø«×
+            // é™åˆ¶æ—¥èªŒé•·åº¦
             if (lstLog.Items.Count > 200) lstLog.Items.RemoveAt(lstLog.Items.Count - 1);
         }
     }
 
-    // ¬°¤F§Ç¦C¤Æ¤Gºû°}¦C¡A¨Ï¥Î¤¤¤¶Ãş
+    // ç‚ºäº†åºåˆ—åŒ–äºŒç¶­é™£åˆ—ï¼Œä½¿ç”¨ä¸­ä»‹é¡
     [Serializable]
     public class SerializableCityState
     {
@@ -637,3 +633,4 @@ namespace CitySimPrototype
         public int Level { get; set; }
     }
 }
+
